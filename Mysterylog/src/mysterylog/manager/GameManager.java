@@ -3,10 +3,13 @@ package mysterylog.manager;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import mysterylog.scene.*;
+
+import mysterylog.config.Theme;
 import mysterylog.exception.GameException;
+import mysterylog.model.Episode;
 import mysterylog.model.Clue;
-import mysterylog.model.SampleData;
+import mysterylog.model.Suspect;
+import mysterylog.scene.*;
 
 public class GameManager {
 
@@ -16,80 +19,116 @@ public class GameManager {
 
 	// 패널
 	private MainPanel mainPanel;
-	private InterrogationPanel2 interrogationPanel;
+	private InterrogationPanel interrogationPanel;
 	private InvestigationPanel investigationPanel;
-	private DeductionPanel2 deductionPanel;
+	private DeductionPanel deductionPanel;
+	private EpisodeSelectionPanel episodeSelectionPanel;
+
+	// 현재 에피소드 데이터
+	private Episode currentEpisode;
 
 	public GameManager() {
+		initUI();
+	}
+
+	private void initUI() {
 		frame = new JFrame("Mystery Log");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setSize(700, 600);
+		frame.setSize(900, 700);
+		frame.setLocationRelativeTo(null);
 
 		cardLayout = new CardLayout();
 		mainContainer = new JPanel(cardLayout);
 
 		// 패널 생성
 		mainPanel = new MainPanel(this);
-		interrogationPanel = new InterrogationPanel2(this);
+		interrogationPanel = new InterrogationPanel(this);
 		investigationPanel = new InvestigationPanel(this);
-		deductionPanel = new DeductionPanel2(this);
+		deductionPanel = new DeductionPanel(this);
+		episodeSelectionPanel = new EpisodeSelectionPanel(this);
 
-		// CardLayout에 패널 추가
+		// 카드로 등록
 		mainContainer.add(mainPanel, "MAIN");
 		mainContainer.add(interrogationPanel, "INTERROGATION");
 		mainContainer.add(investigationPanel, "INVESTIGATION");
 		mainContainer.add(deductionPanel, "DEDUCTION");
+		mainContainer.add(episodeSelectionPanel, "EPISODE_SELECTION");
 
 		frame.add(mainContainer);
-		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+
+		// 처음 진입은 에피소드 선택 화면
+		showEpisodeSelection();
 	}
 
-	// 화면 전환
+	// 카드 전환
 	public void moveTo(String panelName) {
-		switch (panelName) {
-		case "MAIN":
-			mainPanel.onEnter();
-			break;
-		case "INTERROGATION":
-			interrogationPanel.onEnter();
-			break;
-		case "INVESTIGATION":
-			investigationPanel.onEnter();
-			break;
-		case "DEDUCTION":
-			deductionPanel.onEnter();
-			break;
-		}
 		cardLayout.show(mainContainer, panelName);
-	}
 
-	// 단서 목록 팝업
-	public void showClueList() {
-		StringBuilder sb = new StringBuilder();
-		boolean found = false;
-		for (Clue c : SampleData.clues) {
-			if (c.isDiscovered()) {
-				sb.append("- ").append(c.getName()).append("\n");
-				found = true;
+		// 현재 패널 onEnter 호출
+		Component comp = null;
+		for (Component c : mainContainer.getComponents()) {
+			if (mainContainer.getLayout() instanceof CardLayout) {
+				if (mainContainer.getComponentZOrder(c) != -1) {
+					// 카드 이름 비교
+					if (mainContainer.getComponentZOrder(c) == ((CardLayout) mainContainer.getLayout()).getHgap()) {
+						comp = c;
+					}
+				}
 			}
 		}
-		if (!found)
-			sb.append("아직 발견한 단서가 없습니다.");
-		JOptionPane.showMessageDialog(frame, sb.toString(), "발견 단서", JOptionPane.INFORMATION_MESSAGE);
+
+		switch (panelName) {
+		case "MAIN" -> mainPanel.onEnter();
+		case "INTERROGATION" -> interrogationPanel.onEnter();
+		case "INVESTIGATION" -> investigationPanel.onEnter();
+		case "DEDUCTION" -> deductionPanel.onEnter();
+		case "EPISODE_SELECTION" -> episodeSelectionPanel.onEnter();
+		}
 	}
 
-	// MainPanel 접근 (로그 표시용)
+	// 메인 패널 반환
 	public MainPanel getMainPanel() {
 		return mainPanel;
 	}
 
+	public Episode getCurrentEpisode() {
+		return currentEpisode;
+	}
+	
+	public void setCurrentEpisode(Episode episode) {
+		this.currentEpisode = episode;
+	}
+
+	// 현재 에피소드에서 용의자 반환
+	public List<Suspect> getCurrentSuspects() {
+		if (currentEpisode != null) {
+			return currentEpisode.getSuspects();
+		}
+		return List.of();
+	}
+	
+	// 현재 에피소드에서 단서 반환
+	public List<Clue> getCurrentClues() {
+		if (currentEpisode != null) {
+			return currentEpisode.getClues();
+		}
+		return List.of();
+	}
+
+	// 새 사건 시작
 	public void startNewCase() throws GameException {
-		// SampleData 초기화
-		for (Clue c : SampleData.clues) {
+		if (currentEpisode == null) {
+			throw new GameException("선택한 에피소드가 없습니다.");
+		}
+
+		// 모든 단서 초기화
+		for (Clue c : getCurrentClues()) {
 			c.setDiscovered(false);
 		}
-		for (var s : SampleData.suspects) {
+
+		// 모든 용의자 초기화
+		for (Suspect s : getCurrentSuspects()) {
 			s.reset();
 		}
 
@@ -100,22 +139,60 @@ public class GameManager {
 			JOptionPane.showMessageDialog(frame, e.getMessage(), "로그 초기화 오류", JOptionPane.ERROR_MESSAGE);
 		}
 
+		// 알림
 		JOptionPane.showMessageDialog(frame, "새 사건이 시작되었습니다.", "새 사건", JOptionPane.INFORMATION_MESSAGE);
 
-		// 화면 초기화
+		// 메인 화면으로 이동
 		moveTo("MAIN");
 	}
 
-	public void endCase() {
-		int confirm = JOptionPane.showConfirmDialog(frame, "정말 사건을 종료하시겠습니까?", "사건 종료", JOptionPane.YES_NO_OPTION);
-		if (confirm == JOptionPane.YES_OPTION) {
-			try {
-				LogManager.saveLog("사건 종료"); // GameException 가능
-			} catch (GameException e) {
-				JOptionPane.showMessageDialog(frame, e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
-			}
-			JOptionPane.showMessageDialog(frame, "사건이 종료되었습니다.", "종료", JOptionPane.INFORMATION_MESSAGE);
-			moveTo("MAIN");
+	// 에피소드 선택
+	public void selectEpisode(Episode episode) {
+		this.currentEpisode = episode;
+		try {
+			startNewCase();
+		} catch (GameException e) {
+			JOptionPane.showMessageDialog(frame, e.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+
+	// 에피소드 선택 화면 호출
+	public void showEpisodeSelection() {
+		moveTo("EPISODE_SELECTION");
+	}
+
+	// 단서 목록 화면 호출
+	public void showClueList() {
+	    // 단서 목록 팝업 생성
+	    java.util.List<Clue> clues = getCurrentClues();
+	    if (clues.isEmpty()) {
+	        JOptionPane.showMessageDialog(
+	            frame,
+	            "현재 단서가 없습니다.",
+	            "단서 목록",
+	            JOptionPane.INFORMATION_MESSAGE
+	        );
+	        return;
+	    }
+
+	    JTextArea clueArea = new JTextArea(15, 40);
+	    clueArea.setEditable(false);
+	    StringBuilder sb = new StringBuilder();
+	    for (Clue c : clues) {
+	        sb.append("- ").append(c.getName())
+	          .append(c.isDiscovered() ? " (발견됨)" : "")
+	          .append("\n");
+	    }
+	    clueArea.setText(sb.toString());
+	    clueArea.setCaretPosition(0);
+
+	    JScrollPane scrollPane = new JScrollPane(clueArea);
+
+	    JOptionPane.showMessageDialog(
+	        frame,
+	        scrollPane,
+	        "단서 목록",
+	        JOptionPane.INFORMATION_MESSAGE
+	    );
 	}
 }
