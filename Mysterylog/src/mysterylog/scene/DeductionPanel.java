@@ -17,12 +17,15 @@ public class DeductionPanel extends JPanel implements Scene {
 	private JTextArea textArea;
 	private GameManager gm;
 
+	private Suspect selectedSuspect = null; // 선택된 용의자
+	private JLabel selectedLabel; // 선택된 용의자 표시
+
 	public DeductionPanel(GameManager gm) {
 		this.gm = gm;
 		setLayout(new BorderLayout());
 		setBackground(Theme.PANEL_BG);
 
-		// 타이틀 ==========================
+		// 타이틀
 		ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/deduction.png"));
 		Image img = originalIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 		JLabel title = new JLabel(" 추리하기: 범인을 지목", new ImageIcon(img), SwingConstants.CENTER);
@@ -33,7 +36,7 @@ public class DeductionPanel extends JPanel implements Scene {
 		title.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 		add(title, BorderLayout.NORTH);
 
-		// 중앙 내용 영역
+		// 중앙 패널
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 		centerPanel.setBackground(Theme.PANEL_BG);
@@ -44,12 +47,45 @@ public class DeductionPanel extends JPanel implements Scene {
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		centerPanel.add(infoLabel);
 
+		// 선택된 용의자 표시
+		selectedLabel = new JLabel("선택된 용의자: 없음", SwingConstants.CENTER);
+		selectedLabel.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
+		selectedLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+		centerPanel.add(selectedLabel);
+
 		// 용의자 버튼 패널
 		JPanel suspectPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 		suspectPanel.setBackground(Theme.PANEL_BG);
-		suspectPanel.setName("suspectPanel"); // 이름 지정
+		suspectPanel.setName("suspectPanel");
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		centerPanel.add(suspectPanel);
+
+		// 제출 버튼: 용의자 버튼 아래
+		JButton submitBtn = Theme.createStyleButton("제출");
+		submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+		centerPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+		centerPanel.add(submitBtn);
+
+		submitBtn.addActionListener(e -> {
+			try {
+				if (selectedSuspect == null) {
+					throw new GameException("용의자를 선택해주세요!");
+				}
+
+				int confirm = JOptionPane.showConfirmDialog(this,
+						"정말로 " + selectedSuspect.getName() + "을(를) 범인으로 지목하시겠습니까?", "확인", JOptionPane.YES_NO_OPTION);
+
+				if (confirm == JOptionPane.YES_OPTION) {
+					accuse(selectedSuspect);
+					selectedSuspect = null;
+					selectedLabel.setText("선택된 용의자: 없음");
+				}
+
+			} catch (GameException ex) {
+				JOptionPane.showMessageDialog(this, ex.getMessage(), "경고", JOptionPane.WARNING_MESSAGE);
+			}
+		});
 
 		// 결과 텍스트 영역
 		textArea = new JTextArea(8, 40);
@@ -80,18 +116,14 @@ public class DeductionPanel extends JPanel implements Scene {
 				JOptionPane.showMessageDialog(null, ex.getMessage(), "오류", JOptionPane.ERROR_MESSAGE);
 			}
 		});
-		
+
 		endBtn.addActionListener(e -> {
-		    int confirm = JOptionPane.showConfirmDialog(
-		        null,
-		        "정말 사건을 종료하시겠습니까?",
-		        "사건 종료 확인",
-		        JOptionPane.YES_NO_OPTION
-		    );
-		    if (confirm == JOptionPane.YES_OPTION) {
-		        gm.setCurrentEpisode(null);        // 현재 사건 초기화
-		        gm.moveTo("EPISODE_SELECTION");    // 에피소드 선택 화면으로 이동
-		    }
+			int confirm = JOptionPane.showConfirmDialog(null, "정말 사건을 종료하시겠습니까?", "사건 종료 확인",
+					JOptionPane.YES_NO_OPTION);
+			if (confirm == JOptionPane.YES_OPTION) {
+				gm.setCurrentEpisode(null);
+				gm.moveTo("EPISODE_SELECTION");
+			}
 		});
 
 		mainBtn.addActionListener(e -> gm.moveTo("MAIN"));
@@ -103,7 +135,6 @@ public class DeductionPanel extends JPanel implements Scene {
 	}
 
 	// ============================================================
-
 	// 범인 지목
 	private void accuse(Suspect s) {
 		if (textArea == null)
@@ -142,7 +173,8 @@ public class DeductionPanel extends JPanel implements Scene {
 				if (c != null && c.isDiscovered() && "INTERROGATION".equals(c.getType()) && c.getDiscoveredBy() != null
 						&& !displayed.contains(c)) {
 					textArea.append("• 심문 단서: " + c.getDiscoveredBy().getName() + ": " + c.getName() + "\n"
-							      + "       설명: " + c.getDescription() + (c.isFake() ? " (의심)" : "") + " (신뢰도: " + c.getReliability() + ")\n");
+							+ "       설명: " + c.getDescription() + (c.isFake() ? " (의심)" : "") + " (신뢰도: "
+							+ c.getReliability() + ")\n");
 					displayed.add(c);
 				}
 			}
@@ -152,15 +184,14 @@ public class DeductionPanel extends JPanel implements Scene {
 		for (Clue c : gm.getCurrentClues()) {
 			if (c.isDiscovered() && "INVESTIGATION".equals(c.getType()) && c.getDiscoveredBy() == null
 					&& !displayed.contains(c)) {
-				textArea.append("• 현장 단서: " + c.getName() + "\n"
-						      + "       설명: " + c.getDescription() + " (신뢰도: " + c.getReliability() + ")\n");
+				textArea.append("• 현장 단서: " + c.getName() + "\n" + "       설명: " + c.getDescription() + " (신뢰도: "
+						+ c.getReliability() + ")\n");
 				displayed.add(c);
 			}
 		}
 
-		// =====================================
 		// 용의자 버튼 갱신
-		JPanel centerPanel = (JPanel) getComponent(1); // centerPanel
+		JPanel centerPanel = (JPanel) getComponent(1);
 		JPanel suspectPanel = null;
 		for (Component c : centerPanel.getComponents()) {
 			if (c instanceof JPanel p && "suspectPanel".equals(p.getName())) {
@@ -173,7 +204,10 @@ public class DeductionPanel extends JPanel implements Scene {
 			suspectPanel.removeAll();
 			for (Suspect s : gm.getCurrentSuspects()) {
 				JButton btn = Theme.createStyleButton(s.getName());
-				btn.addActionListener(e -> accuse(s));
+				btn.addActionListener(e -> {
+					selectedSuspect = s;
+					selectedLabel.setText("선택된 용의자: " + s.getName());
+				});
 				suspectPanel.add(btn);
 			}
 			suspectPanel.revalidate();
