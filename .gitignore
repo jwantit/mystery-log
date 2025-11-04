@@ -27,3 +27,5 @@ replay_pid*
 .metadata/        # Eclipse 워크스페이스 설정
 .project          # Eclipse 프로젝트 설정 파일
 .classpath        # Eclipse Classpath 설정
+.metadata/
+.project
