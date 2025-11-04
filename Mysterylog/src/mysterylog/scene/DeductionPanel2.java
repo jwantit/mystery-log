@@ -23,7 +23,7 @@ public class DeductionPanel2 extends JPanel implements Scene {
 		setLayout(new BorderLayout());
 		setBackground(Theme.PANEL_BG);
 
-		//타이틀 ==========================
+		// 타이틀 ==========================
 		ImageIcon originalIcon = new ImageIcon(getClass().getResource("/resources/deduction.png"));
 		Image img = originalIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
 		JLabel title = new JLabel(" 추리하기: 범인을 지목", new ImageIcon(img), SwingConstants.CENTER);
@@ -35,7 +35,7 @@ public class DeductionPanel2 extends JPanel implements Scene {
 		add(title, BorderLayout.NORTH);
 
 		// ============================================================
-		// 🔹 중앙 내용 영역 (BoxLayout)
+		// 중앙 내용 영역 (BoxLayout)
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 		centerPanel.setBackground(Theme.PANEL_BG);
@@ -46,7 +46,7 @@ public class DeductionPanel2 extends JPanel implements Scene {
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		centerPanel.add(infoLabel);
 
-		// 🔹 용의자 버튼 패널
+		// 용의자 버튼 패널
 		JPanel suspectPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 		suspectPanel.setBackground(Theme.PANEL_BG);
 
@@ -59,7 +59,7 @@ public class DeductionPanel2 extends JPanel implements Scene {
 		centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 		centerPanel.add(suspectPanel);
 
-		// 🔹 결과 텍스트 영역 (InterrogationPanel2의 statementArea 스타일)
+		// 🔹 결과 텍스트 영역
 		textArea = new JTextArea(8, 40);
 		textArea.setEditable(false);
 		textArea.setFont(new Font("맑은 고딕", Font.PLAIN, 14));
@@ -75,7 +75,7 @@ public class DeductionPanel2 extends JPanel implements Scene {
 		add(centerPanel, BorderLayout.CENTER);
 
 		// ============================================================
-		// 🔹 하단 버튼 패널 (InterrogationPanel2와 동일 구조)
+		// 하단 버튼 패널
 		JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 		bottomPanel.setBackground(Theme.PANEL_BG);
 
@@ -101,6 +101,8 @@ public class DeductionPanel2 extends JPanel implements Scene {
 	}
 
 	// ============================================================
+
+	// 용의자 선택 시 실행 함수
 	private void accuse(Suspect s) {
 		if (textArea == null)
 			return;
@@ -127,22 +129,48 @@ public class DeductionPanel2 extends JPanel implements Scene {
 
 	@Override
 	public void refreshClues() {
-		if (textArea == null)
-			return;
+	    if (textArea == null) return;
 
-		StringBuilder summary = new StringBuilder("단서 요약:\n");
-		Set<Clue> discovered = new HashSet<>();
+	    StringBuilder summary = new StringBuilder("\n단서 요약:\n");
+	    Set<Clue> displayed = new HashSet<>();
 
-		for (Suspect s : SampleData.suspects) {
-			for (Clue c : s.getHiddenClues()) {
-				if (c != null && c.isDiscovered() && !discovered.contains(c)) {
-					summary.append("• ").append(s.getName()).append(": ").append(c.getName()).append("\n");
-					discovered.add(c);
-				}
-			}
-		}
+	    // 심문 단서 (INTERROGATION, discoveredBy != null)
+	    for (Suspect s : SampleData.suspects) {
+	        for (Clue c : s.getHiddenClues()) {
+	            if (c != null && c.isDiscovered() && "INTERROGATION".equals(c.getType())
+	                    && c.getDiscoveredBy() != null && !displayed.contains(c)) {
+	                summary.append("• 심문 단서: ").append(c.getDiscoveredBy().getName())
+	                       .append(": ").append(c.getName())
+	                       .append(c.isFake() ? " ⚠️(의심)" : "")
+	                       .append(" [" + c.getType() + "]")
+	                       .append(" (신뢰도: ").append(c.getReliability()).append(")\n");
+	                displayed.add(c);
+	            }
+	        }
+	    }
 
-		textArea.append(summary.toString() + "\n");
+	    // 현장조사 단서 (INVESTIGATION, discoveredBy == null)
+	    for (Clue c : SampleData.clues) {
+	        if (c.isDiscovered() && "INVESTIGATION".equals(c.getType()) 
+	                && c.getDiscoveredBy() == null && !displayed.contains(c)) {
+	            summary.append("• 현장 단서: ").append(c.getName())
+	                   .append(" [" + c.getType() + "]")
+	                   .append(" (신뢰도: ").append(c.getReliability()).append(")\n");
+	            displayed.add(c);
+	        }
+	    }
+
+	    // 파생 단서 (derived == true)
+	    for (Clue c : SampleData.clues) {
+	        if (c.isDerived() && c.isDiscovered() && !displayed.contains(c)) {
+	            summary.append("• 파생 단서: ").append(c.getName())
+	                   .append(" [" + c.getType() + "]")
+	                   .append(" (신뢰도: ").append(c.getReliability()).append(")\n");
+	            displayed.add(c);
+	        }
+	    }
+
+	    textArea.setText(summary.toString());
 	}
 
 	@Override

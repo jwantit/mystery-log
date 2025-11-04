@@ -31,7 +31,7 @@ public class Theme {
         button.setBorder(BorderFactory.createLineBorder(PRIMARY_COLOR, 2));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // 💡 마우스 오버(Hover) 효과 추가
+        //마우스 오버(Hover) 효과 추가
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(PRIMARY_HOVER_COLOR); 

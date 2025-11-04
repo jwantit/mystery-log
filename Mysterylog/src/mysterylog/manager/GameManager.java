@@ -94,7 +94,11 @@ public class GameManager {
 		}
 
 		// 로그 초기화
-		LogManager.clearLogs();
+		try {
+			LogManager.clearLogs();
+		} catch (GameException e) {
+			JOptionPane.showMessageDialog(frame, e.getMessage(), "로그 초기화 오류", JOptionPane.ERROR_MESSAGE);
+		}
 
 		JOptionPane.showMessageDialog(frame, "새 사건이 시작되었습니다.", "새 사건", JOptionPane.INFORMATION_MESSAGE);
 

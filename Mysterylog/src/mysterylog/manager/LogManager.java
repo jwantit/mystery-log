@@ -1,6 +1,7 @@
 package mysterylog.manager;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import mysterylog.exception.GameException;
 public class LogManager {
 	private static List<String> logs = new ArrayList<>();
 	private static final String LOG_FILE = "game_log.txt";
-
+	
 	// 로그 저장 (메모리 + 파일)
 	public static void saveLog(String msg) throws GameException {
 		logs.add(msg);

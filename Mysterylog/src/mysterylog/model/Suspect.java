@@ -27,35 +27,40 @@ public class Suspect {
 		return hiddenClues;
 	}
 
-	public String answerQuestion(int index) throws GameException  {
+	public String answerQuestion(int index) throws GameException {
 		if (index < 0 || index >= statements.size()) {
 			throw new GameException("!질문 인덱스 오류");
 		}
 
-		// askedQuestions에 들어온 index가 이미 있을 경우
 		if (askedQuestions.contains(index)) {
 			return "!이미 질문한 내용입니다.";
 		}
 
 		askedQuestions.add(index);
 
-		// 그게 아니라면 단서 리스트에서 해당 인덱스의 clue 객체 추출 후 setDiscovered 메소드 호출
-		Clue clue = hiddenClues.get(index);
 		String statement = statements.get(index);
-		
-		// 단서가 존재하고, INTERROGATION 유형일 때
-	    if (clue != null && clue.getType().equals("INTERROGATION")) {
-	        clue.setDiscovered(true);
+		Clue clue = hiddenClues.get(index);
 
-	        // 강조된 포맷으로 리턴
-	        return statement
-	             + "\n\n<단서 발견!>\n"
-	             + "================\n"
-	             + clue.getName()
-	             + "\n================\n";
-	    }
-	    
-	    return statement;
+		StringBuilder result = new StringBuilder();
+		result.append("[질문 ").append(index + 1).append("] ").append(statement).append("\n");
+
+		if (clue != null && !clue.isDiscovered()) {
+			clue.setDiscovered(true);
+			clue.setDiscoveredBy(this);
+			result.append("  단서: " + clue.getName() + "\n");
+		}
+
+		return result.toString();
+	}
+
+	// 가짜 단서 확인
+	public boolean hasFakeClue() {
+		for (Clue clue : hiddenClues) {
+			if (clue.isFake()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void reset() {
