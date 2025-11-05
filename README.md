@@ -1,6 +1,6 @@
 # 🕵️‍♀️ Mystery Log: 추리 게임 시뮬레이터
 
-> 🔗 [프로젝트 상세 기획 및 문서: [Notion Link](https://www.notion.so/Java-Mini-Project-29c4a633a3a180ddb137c04d292be42e?pvs=12)]
+> 🔗 [프로젝트 상세 기획 및 문서: [Notion Link](https://www.notion.so/Java-Mini-Project-29c4a633a3a180ddb137c04d292be42e?pvs=12)
 ---
 
 ## 👤 개발자 정보
