@@ -1,2 +1,135 @@
-# mystery-log
-Java Mini Project
+# 🕵️‍♀️ Mystery Log: 추리 게임 시뮬레이터
+
+> 🔗 [프로젝트 상세 기획 및 문서: [Notion Link](https://www.notion.so/Java-Mini-Project-29c4a633a3a180ddb137c04d292be42e?pvs=12)]
+---
+
+## 👤 개발자 정보
+
+- 이름: 김지원
+- 개발 기간: 3일
+- 개발 형태: 개인 프로젝트
+- 언어 / 기술: Java (Swing, 컬렉션 프레임워크, 상속, 인터페이스, 예외 처리, 파일 입출력)
+- DB 사용 여부: 미사용 (텍스트 파일 기반 로그)
+
+---
+
+## 📚 프로젝트 개요
+
+Mystery Log는 사용자가 탐정이 되어 미스터리 사건을 해결하는 Java 기반 추리 시뮬레이션 게임입니다.
+플레이어는 현장 조사와 용의자 심문을 통해 단서를 수집하고, 최종적으로 범인을 추리합니다.
+게임 로그는 텍스트 파일로 저장되며, UI는 Swing을 활용한 대화창과 선택지 형태로 구성됩니다.
+
+**기획 의도:**
+Java 프로그래밍 학습 내용을 실제 프로젝트에 적용하며, 상속, 인터페이스, 컬렉션, 예외 처리, 파일 I/O 등 핵심 개념을 통합적으로 구현합니다.
+추리·보드게임 취미를 반영하여 논리적 사고와 스토리텔링을 결합한 실습형 프로젝트입니다.
+
+---
+
+## 🏆 개발 목표
+
+| 구분        | 목표                                                     |
+| ----------- | -------------------------------------------------------- |
+| 기술적 목표 | Java 주요 기능 종합 구현                                 |
+| 학습적 목표 | 객체지향 구조와 자료 관리 방식 이해                      |
+| 창의적 목표 | 추리·보드게임 기반 실습형 프로젝트 제작                  |
+| 기간 목표   | 3일 내 심문, 조사, 추리, 로그 기능 포함 기본 완성본 개발 |
+
+---
+
+## 🛠️ 기술 스택
+
+- 언어: Java 17 이상
+- GUI: Swing
+- 데이터 관리: ArrayList, HashMap
+- 예외 처리: 사용자 정의 예외 (`GameException`) 및 `try-catch-finally`
+- 파일 입출력: 로그 저장/불러오기 (`try-with-resources`)
+
+---
+
+## 🧱 핵심 OOP 설계 분석
+
+### 1. 클래스 구조 및 계층
+
+프로젝트는 역할에 따라 명확하게 패키지화되어 응집도를 높이고 결합도를 낮추었습니다.
+
+|         패키지         |              주요 역할               |                        핵심 클래스                        |
+| :--------------------: | :----------------------------------: | :-------------------------------------------------------: |
+|   `mysterylog.model`   |     비즈니스 모델 및 데이터 정의     | `Clue`, `Suspect`, `«interface» Episode`, `MurderMystery` |
+|   `mysterylog.scene`   | 사용자 인터페이스 (GUI) 및 화면 전환 |  `«interface» Scene`, `MainPanel`, `InterrogationPanel`   |
+|  `mysterylog.manager`  |        게임 상태 및 흐름 제어        |                `GameManager`, `LogManager`                |
+|  `mysterylog.config`   |         전역 설정 및 스타일          |                          `Theme`                          |
+| `mysterylog.exception` |           커스텀 예외 처리           |                      `GameException`                      |
+
+### 2. 상속과 인터페이스의 활용 목적
+
+|         클래스/인터페이스         |                                                                               사용 목적                                                                                |       Java 키워드        |
+| :-------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :----------------------: |
+|       `«interface» Episode`       |                                                                              다형성 구현                                                                               |       `implements`       |
+|  `MurderMystery`, `OfficeFraud`   |  `Episode`를 구현하여 각 사건의 고유한 데이터(`Title`, `Clues`, `Suspects`)를 제공합니다. `GameManager`는 `Episode` 타입으로 모든 사건을 동일하게 처리할 수 있습니다.  | `extends` / `implements` |
+|        `«interface» Scene`        |                                                                             화면 전환 관리                                                                             |       `implements`       |
+| `MainPanel`, `InvestigationPanel` | `Scene`을 구현하여 모든 화면(패널)이 `onEnter()`, `onExit()` 등 표준화된 생명주기 메서드를 가지도록 강제하고, `GameManager`를 통한 통일된 화면 전환을 가능하게 합니다. |                          |
+|          `GameException`          |                                                                               예외 처리                                                                                |        `extends`         |
+|          `GameException`          |           Java 표준 `Exception`을 상속받아 게임 로직에 특화된 오류(예: 에피소드 선택 오류, 로그 저장 오류)를 명확히 구분하고 사용자에게 친절하게 처리합니다.           |        `extends`         |
+
+---
+
+## 📊 UML 클래스 다이어그램
+
+![mysterylog drawio](https://github.com/user-attachments/assets/34302ece-d1d4-484a-a3eb-163cc19ba5a9)
+
+---
+
+## ⚙️ 주요 기능
+
+| 번호 |          기능명           |            주요 구현 클래스            |                  사용 기술 / 개념                   | 상세 설명                                                                                                             |
+| :--: | :-----------------------: | :------------------------------------: | :-------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------- |
+|  1   |  **다중 에피소드 처리**   |        `Episode`, `GameManager`        |                 인터페이스, 다형성                  | `Episode` 인터페이스를 구현하여 `GameManager`가 사건 종류와 무관하게 모든 에피소드를 동일하게 처리 가능하도록 구조화. |
+|  2   |     게임 시작 및 메뉴     | `GameManager`, `EpisodeSelectionPanel` |                 Swing, 이벤트 처리                  | 이름 입력, 새 게임/이어하기 선택, 사건 개요 제공 및 화면 전환 관리                                                    |
+|  3   | 현장 조사 (Investigation) |      `InvestigationPanel`, `Clue`      |          클래스, 컬렉션(List, Map), Swing           | 장소별 단서 탐색 및 리스트 관리, 단서 발견 시 `GameManager`를 통한 로그 갱신.                                         |
+|  4   | 심문하기 (Interrogation)  |    `InterrogationPanel`, `Suspect`     | 클래스 상속, 인터페이스(Scene), 컬렉션, 파일 입출력 | 용의자별 질문 선택, 진술 수집, `Suspect` 클래스 내 로직 분리를 통한 단서 획득.                                        |
+|  5   |   추리하기 (Deduction)    |      `DeductionPanel`, `Episode`       |             클래스, 인터페이스, 컬렉션              | 수집된 단서와 진술 기반 범인 추리, 정답 여부에 따른 결말 분기 처리.                                                   |
+|  6   |    로그 저장/불러오기     |              `LogManager`              |               파일 입출력, 예외 처리                | 단서, 대화, 선택지 등을 텍스트 파일로 저장/불러오기. `try-with-resources` 구문을 활용하여 I/O 안정성 확보.            |
+|  7   | 예외 처리 (ErrorHandler)  |            `GameException`             |        `try-catch-finally`, 사용자 정의 예외        | 입력 오류 및 파일 I/O 오류 발생 시 안정적인 처리 및 사용자 피드백 제공.                                               |
+
+---
+
+## 🚨 예외 처리: 커스텀 예외(`GameException`)를 통한 안정성 확보
+
+이 프로젝트에서는 게임 로직과 파일 입출력에서 발생할 수 있는 오류를 사용자 정의 예외 `GameException`으로 통합 관리하여 안정성과 사용자 친화성을 높였습니다.
+
+### 1. `GameException` 클래스 개요
+
+`GameException`은 Java 표준 `Exception` 클래스를 상속받습니다.
+
+| 메서드 시그니처                                       | 사용 목적                                       |
+| :---------------------------------------------------- | :---------------------------------------------- |
+| `public GameException(String message)`                | 일반적인 게임 로직 오류 메시지 전달             |
+| `public GameException(String message, IOException e)` | 파일 I/O 오류 발생 시 원인 예외를 포함하여 처리 |
+| `public GameException(Exception e)`                   | 예상치 못한 모든 예외를 통합 처리               |
+
+**주요 특징:**
+
+- **통합 관리:** 게임 로직 전반에서 발생하는 모든 오류를 통합 관리합니다.
+- **디버깅 용이:** 원인 예외(`IOException`)를 포함할 수 있어 개발 시 디버깅이 용이합니다.
+- **UI 친화성:** `toString()` 오버라이드를 통해 오류 메시지를 깔끔하게 정리하여 UI에 출력합니다.
+
+### 2. 적용 사례 및 UI 연동
+
+| 상황                    | 구현 예시                                                                                                                             | 설명                                                                                              |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------ |
+| **용의자 미선택**       | `if(currentSuspect==null) throw new GameException("용의자를 선택하지 않았습니다!");`                                                  | 사용자가 추리 패널에서 범인 지목 전 용의자를 선택하지 않았을 때 경고 메시지 표시.                 |
+| **로그 파일 읽기 실패** | `catch(IOException e){ throw new GameException("로그 파일 읽기 실패", e); }`                                                          | `LogManager`에서 파일 입출력 오류 발생 시 stack trace와 함께 UI 알림 제공.                        |
+| **UI 연동 예시**        | `try { /* 로직 */ } catch(GameException e) { JOptionPane.showMessageDialog(null, e.toString(), "오류", JOptionPane.ERROR_MESSAGE); }` | `JOptionPane`과 연동하여, 게임 화면에서 바로 사용자에게 친절하고 일관된 오류 메시지를 제공합니다. |
+
+---
+
+## 🎥 실행 화면 (Demo)
+
+게임의 주요 기능과 흐름을 GIF로 확인할 수 있습니다.
+
+|          기능          |       GIF        | 설명                                        |
+| :--------------------: | :--------------: | :------------------------------------------ |
+|     에피소드 선택      | ![SelectEpisode](https://github.com/user-attachments/assets/30dfef6d-528f-4642-b48e-2c9369899086) | 초기 화면에서 사건 선택 및 설명 확인        |
+|   심문 및 단서 획득    | ![Interrogation](https://github.com/user-attachments/assets/6ff9acbc-db38-46f6-b0bd-637334842cc3) | 용의자 선택, 질문 후 답변 확인 및 단서 획득 |
+| 현장 조사 및 로그 기록 | ![Investigation](https://github.com/user-attachments/assets/27306d21-f297-4ea5-9ff0-f66cdad46928) | 조사 장소 선택 후 단서 발견 및 로그 기록    |
+|       최종 추리       | ![Deduction](https://github.com/user-attachments/assets/d271ce28-80d2-4bd6-b524-9bbe173bf160) | 수집된 단서 요약 후 범인 지목 및 결말 확인  |
