@@ -75,7 +75,7 @@ Java 프로그래밍 학습 내용을 실제 프로젝트에 적용하며, 상�
 
 ## 📊 UML 클래스 다이어그램
 
-![mysterylog drawio](https://github.com/user-attachments/assets/34302ece-d1d4-484a-a3eb-163cc19ba5a9)
+<img width="2007" height="1838" alt="mysterylog drawio" src="https://github.com/user-attachments/assets/fbbb5518-efa8-4030-81f2-c92d5f473a02" />
 
 ---
 
