@@ -129,7 +129,7 @@ Java 프로그래밍 학습 내용을 실제 프로젝트에 적용하며, 상�
 
 |          기능          |       GIF        | 설명                                        |
 | :--------------------: | :--------------: | :------------------------------------------ |
-|     에피소드 선택      | \[GIF 삽입 예정] | 초기 화면에서 사건 선택 및 설명 확인        |
-| 현장 조사 및 로그 기록 | \[GIF 삽입 예정] | 조사 장소 선택 후 단서 발견 및 로그 기록    |
-|   심문 및 단서 획득    | \[GIF 삽입 예정] | 용의자 선택, 질문 후 답변 확인 및 단서 획득 |
-|       최종 추리        | \[GIF 삽입 예정] | 수집된 단서 요약 후 범인 지목 및 결말 확인  |
+|     에피소드 선택      | ![SelectEpisode](https://github.com/user-attachments/assets/30dfef6d-528f-4642-b48e-2c9369899086) | 초기 화면에서 사건 선택 및 설명 확인        |
+|   심문 및 단서 획득    | ![Interrogation](https://github.com/user-attachments/assets/6ff9acbc-db38-46f6-b0bd-637334842cc3) | 용의자 선택, 질문 후 답변 확인 및 단서 획득 |
+| 현장 조사 및 로그 기록 | ![Investigation](https://github.com/user-attachments/assets/27306d21-f297-4ea5-9ff0-f66cdad46928) | 조사 장소 선택 후 단서 발견 및 로그 기록    |
+|       최종 추리       | ![Deduction](https://github.com/user-attachments/assets/d271ce28-80d2-4bd6-b524-9bbe173bf160) | 수집된 단서 요약 후 범인 지목 및 결말 확인  |
