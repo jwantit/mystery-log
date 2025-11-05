@@ -73,16 +73,6 @@ public class Suspect {
 		return result.toString();
 	}
 
-	// 가짜 단서 확인
-	public boolean hasFakeClue() {
-		for (Clue clue : hiddenClues) {
-			if (clue.isFake()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public void reset() {
 		askedQuestions.clear();
 		for (Clue c : hiddenClues) {

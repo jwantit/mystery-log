@@ -6,15 +6,10 @@ import java.awt.*;
 public class Theme {
 
     // 색상
-    // 💡 PRIMARY_COLOR를 파란색 계열로 재정의
     public static final Color PRIMARY_COLOR = new Color(70, 130, 180);       // 짙은 파란색 (Steel Blue)
     public static final Color PRIMARY_HOVER_COLOR = new Color(100, 149, 237); // 마우스 오버 시 밝은 파란색
-    
     public static final Color TITLE_BG_COLOR = new Color(50, 50, 50);
-    
     public static final Color PANEL_BG = new Color(230, 230, 230); //회색
-    public static final Color SECONDARY_COLOR = new Color(220, 20, 60);    // (이전 붉은색)
-    public static final Color BACKGROUND_COLOR = new Color(245, 245, 245);  // 연회색
     public static final Color BUTTON_TEXT_COLOR = Color.WHITE;               // 버튼 글자색
     public static final Color BUTTON_BG_COLOR = PRIMARY_COLOR;               // 버튼 배경색
 
